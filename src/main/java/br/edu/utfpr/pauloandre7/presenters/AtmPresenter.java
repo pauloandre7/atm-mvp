@@ -71,8 +71,6 @@ public class AtmPresenter implements IAtmPresenter {
         }
 
         float saldoOrigemAnterior = contaOrigem.getSaldo();
-        float saldoDestinoAnterior = contaDestino.getSaldo();
-
         try {
             contaOrigem.diminuirSaldo(valor);
             contaDestino.aumentarSaldo(valor);
@@ -82,9 +80,13 @@ public class AtmPresenter implements IAtmPresenter {
             view.exibirMensagemSucesso("Transferência realizada com sucesso.");
             view.limparCampos();
         } catch (Exception exception) {
-            contaDestino.aumentarSaldo(saldoDestinoAnterior - contaDestino.getSaldo());
             view.exibirMensagemErro(exception.getMessage());
         }
+    }
+
+    @Override
+    public void onExtratoClicked(String numConta) {
+        exibirExtrato(numConta);
     }
 
     public void exibirDadosUsuario(String numConta) {
