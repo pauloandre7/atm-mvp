@@ -1,0 +1,45 @@
+# Pasta de Build e Compilação do Maven
+target/
+build/
+
+# Dependências baixadas pelo Maven (desnecessárias no Git)
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Arquivos de log e temporários
+*.log
+logs/
+*.tmp
+*.swp
+*~
+
+# Arquivos de sistema do SO
+.DS_Store
+Thumbs.db
+
+# Configurações do IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+
+# Configurações do Eclipse
+.classpath
+.project
+.settings/
+
+# Configurações do Visual Studio Code
+.vscode/
+
+# Logs de Erro da Máquina Virtual Java
+hs_err_pid*
+
+# Arquivos de Configuração com Dados Sensíveis (ex: senhas de banco de dados)
+application.properties
+application.yml
+!application.example.properties
+!application.example.yml
