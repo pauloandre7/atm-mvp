@@ -1,11 +1,5 @@
 package br.edu.utfpr.pauloandre7.models;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.text.StyledEditorKit;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,7 +9,7 @@ public class Conta {
 
     @Getter
     private Long id;
-    
+
     @Getter
     private String numeroConta;
     
@@ -31,16 +25,12 @@ public class Conta {
     @Getter 
     private float saldo;
     
-    @Getter
-    private List<Transacao> transacoes;
-
     public Conta(String numeroConta, String nomeUsuario, String cpf, String senha, float saldo) {
         this.numeroConta = numeroConta;
         this.nomeUsuario = nomeUsuario;
         this.cpf = cpf;
         this.senha = senha;
         this.saldo = saldo;
-        this.transacoes = new ArrayList<Transacao>();
     }
 
     public void diminuirSaldo(float valor) throws Exception{
@@ -55,13 +45,5 @@ public class Conta {
     public void aumentarSaldo(float valor ){
         
         saldo = saldo + valor;
-    }
-
-    public void registrarTransacao(Transacao transacao) throws Exception{
-        if ( transacoes == null ){
-            throw new Exception("O objeto não foi inicializado");
-        }
-
-        transacoes.add(transacao);
     }
 }
