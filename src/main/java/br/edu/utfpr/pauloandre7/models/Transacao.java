@@ -8,7 +8,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class Transacao {
-    
+
     private final Long id;
     private final TiposTransacao tipoTransacao;
     private final float valor;

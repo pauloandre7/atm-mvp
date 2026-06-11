@@ -12,17 +12,17 @@ public class Conta {
 
     @Getter
     private String numeroConta;
-    
+
     @Getter @Setter
     private String nomeUsuario;
-    
+
     @Getter @Setter
     private String cpf;
-    
+
     @Getter @Setter
     private String senha;
 
-    @Getter 
+    @Getter
     private float saldo;
     
     public Conta(String numeroConta, String nomeUsuario, String cpf, String senha, float saldo) {
