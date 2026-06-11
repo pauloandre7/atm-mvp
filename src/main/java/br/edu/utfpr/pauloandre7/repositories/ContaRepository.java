@@ -9,102 +9,104 @@ import br.edu.utfpr.pauloandre7.models.Conta;
 
 public class ContaRepository implements IContaRepository {
 
-    private final List<Conta> contas = new ArrayList<>();
-    private final AtomicLong sequenciaId = new AtomicLong(1L);
+	private final List<Conta> contas = new ArrayList<>();
+	private final AtomicLong sequenciaId = new AtomicLong(1L);
 
-    @Override
-    public synchronized boolean create(Conta conta) {
-        if (conta == null || conta.getNumeroConta() == null) {
-            return false;
-        }
+	@Override
+	public synchronized boolean create(Conta conta) {
+		if (conta == null || conta.getNumeroConta() == null) {
+			return false;
+		}
 
-        // se não houver a conta criada
-        if (findByNumConta(conta.getNumeroConta()) != null) {
-            return false;
-        }
+		if (findByNumConta(conta.getNumeroConta()) != null) {
+			return false;
+		}
 
-        Long id = conta.getId();
-        if (id == null) {
-            // Pega o valor atual do AtomicLong e ja incrementa outro na hora
-            id = sequenciaId.getAndIncrement();
-            if (!atribuirId(conta, id)) {
-                return false;
-            }
-        } else {
-            atualizarSequencia(id);
-        }
+		Long id = conta.getId();
+		if (id == null) {
+			id = sequenciaId.getAndIncrement();
+			if (!atribuirId(conta, id)) {
+				return false;
+			}
+		} else {
+			atualizarSequencia(id);
+		}
 
-        if (findById(id) != null) {
-            return false;
-        }
+		if (findById(id) != null) {
+			return false;
+		}
 
-        contas.add(conta);
-        return true;
-    }
+		contas.add(conta);
+		return true;
+	}
 
-    @Override
-    public synchronized boolean delete(Conta conta) {
-        if (conta == null) {
-            return false;
-        }
+	@Override
+	public synchronized boolean delete(Conta conta) {
+		if (conta == null) {
+			return false;
+		}
 
-        for (int indice = 0; indice < contas.size(); indice++) {
-            Conta atual = contas.get(indice);
-            boolean mesmoId = conta.getId() != null && conta.getId().equals(atual.getId());
-            boolean mesmoNumero = conta.getNumeroConta() != null && conta.getNumeroConta().equals(atual.getNumeroConta());
+		for (int indice = 0; indice < contas.size(); indice++) {
+			Conta atual = contas.get(indice);
+			boolean mesmoId = conta.getId() != null && conta.getId().equals(atual.getId());
+			boolean mesmoNumero = conta.getNumeroConta() != null && conta.getNumeroConta().equals(atual.getNumeroConta());
 
-            if (mesmoId || mesmoNumero) {
-                contas.remove(indice);
-                return true;
-            }
-        }
+			if (mesmoId || mesmoNumero) {
+				contas.remove(indice);
+				return true;
+			}
+		}
 
-        return false;
-    }
+		return false;
+	}
 
-    @Override
-    public synchronized Conta findById(Long id) {
-        if (id == null) {
-            return null;
-        }
+	@Override
+	public synchronized Conta findById(Long id) {
+		if (id == null) {
+			return null;
+		}
 
-        for (Conta conta : contas) {
-            if (id.equals(conta.getId())) {
-                return conta;
-            }
-        }
+		for (Conta conta : contas) {
+			if (id.equals(conta.getId())) {
+				return conta;
+			}
+		}
 
-        return null;
-    }
+		return null;
+	}
 
-    @Override
-    public synchronized Conta findByNumConta(String numConta) {
-        if (numConta == null) {
-            return null;
-        }
+	@Override
+	public synchronized Conta findByNumConta(String numConta) {
+		if (numConta == null) {
+			return null;
+		}
 
-        for (Conta conta : contas) {
-            if (numConta.equals(conta.getNumeroConta())) {
-                return conta;
-            }
-        }
+		for (Conta conta : contas) {
+			if (numConta.equals(conta.getNumeroConta())) {
+				return conta;
+			}
+		}
 
-        return null;
-    }
+		return null;
+	}
 
-    private void atualizarSequencia(Long id) {
-        sequenciaId.updateAndGet(atual -> Math.max(atual, id + 1));
-    }
+	@Override
+	public synchronized List<Conta> findAll() {
+		return new ArrayList<>(contas);
+	}
 
-    private boolean atribuirId(Conta conta, Long id) {
-        try {
-            // O Field acessa o atributo e força uma atribuição mesmo sendo private
-            Field campoId = Conta.class.getDeclaredField("id");
-            campoId.setAccessible(true);
-            campoId.set(conta, id);
-            return true;
-        } catch (ReflectiveOperationException exception) {
-            return false;
-        }
-    }
+	private void atualizarSequencia(Long id) {
+		sequenciaId.updateAndGet(atual -> Math.max(atual, id + 1));
+	}
+
+	private boolean atribuirId(Conta conta, Long id) {
+		try {
+			Field campoId = Conta.class.getDeclaredField("id");
+			campoId.setAccessible(true);
+			campoId.set(conta, id);
+			return true;
+		} catch (ReflectiveOperationException exception) {
+			return false;
+		}
+	}
 }
