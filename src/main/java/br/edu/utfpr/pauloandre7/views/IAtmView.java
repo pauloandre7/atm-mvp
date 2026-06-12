@@ -13,4 +13,5 @@ public interface IAtmView {
     void exibirMensagemErro(String erro);
     void limparCampos();
     void exibirExtrato(List<DadosTransacaoDto> transacoes);
+    void popularCombosDeConta(List<String> numerosContas);
 }

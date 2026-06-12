@@ -27,16 +27,12 @@ import javax.swing.SwingUtilities;
 
 import br.edu.utfpr.pauloandre7.dtos.DadosTransacaoDto;
 import br.edu.utfpr.pauloandre7.dtos.DadosUsuarioDto;
-import br.edu.utfpr.pauloandre7.models.Conta;
 import br.edu.utfpr.pauloandre7.presenters.IAtmPresenter;
-import br.edu.utfpr.pauloandre7.repositories.IContaRepository;
 import br.edu.utfpr.pauloandre7.views.IAtmView;
 
 public class AtmSwingView implements IAtmView {
 
     private static final DateTimeFormatter FORMATO_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-
-    private final IContaRepository contaRepository;
 
     private IAtmPresenter presenter;
 
@@ -51,9 +47,7 @@ public class AtmSwingView implements IAtmView {
     private final JLabel mensagemValor;
     private final JTextArea extratoArea;
 
-    public AtmSwingView(IContaRepository contaRepository) {
-        this.contaRepository = contaRepository;
-
+    public AtmSwingView() {
         this.frame = new JFrame("ATM MVP");
         this.comboContaBase = new JComboBox<>();
         this.comboContaDestino = new JComboBox<>();
@@ -66,8 +60,6 @@ public class AtmSwingView implements IAtmView {
         this.extratoArea = new JTextArea();
 
         configurarInterface();
-        carregarContas();
-        atualizarResumoContaSelecionada();
     }
 
     public void setPresenter(IAtmPresenter presenter) {
@@ -154,7 +146,12 @@ public class AtmSwingView implements IAtmView {
         campoSenha.setPreferredSize(new Dimension(220, 28));
         campoValor.setPreferredSize(new Dimension(220, 28));
 
-        comboContaBase.addActionListener(evento -> atualizarResumoContaSelecionada());
+        comboContaBase.addActionListener(evento -> {
+            String numConta = (String) comboContaBase.getSelectedItem();
+            if (presenter != null && numConta != null) {
+                presenter.onContaSelecionada(numConta);
+            }
+        });
 
         JButton botaoSacar = new JButton("Sacar");
         JButton botaoDepositar = new JButton("Depositar");
@@ -254,117 +251,77 @@ public class AtmSwingView implements IAtmView {
         return painel;
     }
 
-    private void carregarContas() {
-        List<Conta> contas = contaRepository.findAll();
+    @Override
+    public void popularCombosDeConta(List<String> numerosContas) {
         DefaultComboBoxModel<String> modeloBase = new DefaultComboBoxModel<>();
         DefaultComboBoxModel<String> modeloDestino = new DefaultComboBoxModel<>();
 
-        for (Conta conta : contas) {
-            modeloBase.addElement(conta.getNumeroConta());
-            modeloDestino.addElement(conta.getNumeroConta());
+        for (String num : numerosContas) {
+            modeloBase.addElement(num);
+            modeloDestino.addElement(num);
         }
 
         comboContaBase.setModel(modeloBase);
         comboContaDestino.setModel(modeloDestino);
-
-        if (modeloBase.getSize() > 0) {
-            comboContaBase.setSelectedIndex(0);
-        }
-
-        if (modeloDestino.getSize() > 1) {
-            comboContaDestino.setSelectedIndex(1);
-        }
-    }
-
-    private void atualizarResumoContaSelecionada() {
-        Conta conta = getContaSelecionada();
-        if (conta == null) {
-            return;
-        }
-
-        contaValor.setText(conta.getNumeroConta());
-        nomeValor.setText(conta.getNomeUsuario());
-        saldoValor.setText(formatarMoeda(conta.getSaldo()));
-    }
-
-    private Conta getContaSelecionada() {
-        Object selecionado = comboContaBase.getSelectedItem();
-        if (selecionado == null) {
-            return null;
-        }
-
-        return contaRepository.findByNumConta(selecionado.toString());
-    }
-
-    private Conta getContaDestinoSelecionada() {
-        Object selecionado = comboContaDestino.getSelectedItem();
-        if (selecionado == null) {
-            return null;
-        }
-
-        return contaRepository.findByNumConta(selecionado.toString());
+        
+        if (modeloBase.getSize() > 0) comboContaBase.setSelectedIndex(0);
+        if (modeloDestino.getSize() > 1) comboContaDestino.setSelectedIndex(1);
     }
 
     private void executarSaque() {
-        Conta conta = getContaSelecionada();
-        if (conta == null) {
+        String numConta = (String) comboContaBase.getSelectedItem();
+        if (numConta == null) {
             exibirMensagemErro("Selecione uma conta base.");
             return;
         }
 
         Float valor = lerValor();
-        if (valor == null) {
-            return;
-        }
+        if (valor == null) return;
 
-        presenter.onSacarClicked(conta.getNumeroConta(), valor, lerSenha());
+        presenter.onSacarClicked(numConta, valor, lerSenha());
     }
 
     private void executarDeposito() {
-        Conta conta = getContaSelecionada();
-        if (conta == null) {
+        String numConta = (String) comboContaBase.getSelectedItem();
+        if (numConta == null) {
             exibirMensagemErro("Selecione uma conta base.");
             return;
         }
 
         Float valor = lerValor();
-        if (valor == null) {
-            return;
-        }
+        if (valor == null) return;
 
-        presenter.onDepositarClicked(conta.getNumeroConta(), valor, lerSenha());
+        presenter.onDepositarClicked(numConta, valor, lerSenha());
     }
 
     private void executarTransferencia() {
-        Conta contaOrigem = getContaSelecionada();
-        Conta contaDestino = getContaDestinoSelecionada();
+        String contaOrigem = (String) comboContaBase.getSelectedItem();
+        String contaDestino = (String) comboContaDestino.getSelectedItem();
 
         if (contaOrigem == null || contaDestino == null) {
             exibirMensagemErro("Selecione as contas de origem e destino.");
             return;
         }
 
-        if (contaOrigem.getNumeroConta().equals(contaDestino.getNumeroConta())) {
+        if (contaOrigem.equals(contaDestino)) {
             exibirMensagemErro("A conta de origem e destino devem ser diferentes.");
             return;
         }
 
         Float valor = lerValor();
-        if (valor == null) {
-            return;
-        }
+        if (valor == null) return;
 
-        presenter.onTransferirClicked(contaOrigem.getNumeroConta(), contaDestino.getNumeroConta(), valor, lerSenha());
+        presenter.onTransferirClicked(contaOrigem, contaDestino, valor, lerSenha());
     }
 
     private void executarExtrato() {
-        Conta conta = getContaSelecionada();
-        if (conta == null) {
+        String numConta = (String) comboContaBase.getSelectedItem();
+        if (numConta == null) {
             exibirMensagemErro("Selecione uma conta base.");
             return;
         }
 
-        presenter.onExtratoClicked(conta.getNumeroConta());
+        presenter.onExtratoClicked(numConta);
     }
 
     private Float lerValor() {
