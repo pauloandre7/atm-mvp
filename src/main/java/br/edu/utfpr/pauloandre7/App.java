@@ -18,9 +18,13 @@ public class App {
 
             new ContaSeeder().seed(contaRepository);
 
-            AtmSwingView view = new AtmSwingView(contaRepository);
+            AtmSwingView view = new AtmSwingView();
             AtmPresenter presenter = new AtmPresenter(view, contaRepository, transacaoRepository);
             view.setPresenter(presenter);
+
+            
+            presenter.inicializarView();
+
             view.mostrar();
         });
     }

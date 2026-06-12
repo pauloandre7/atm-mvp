@@ -151,4 +151,22 @@ public class AtmPresenter implements IAtmPresenter {
         view.atualizarSaldo(conta.getSaldo());
         view.exibirDadosUsuario(new DadosUsuarioDto(conta.getNomeUsuario(), conta.getNumeroConta(), conta.getSaldo()));
     }
+
+    @Override
+    public void inicializarView() {
+        List<String> contas = contaRepository.findAll().stream()
+            .map(Conta::getNumeroConta).toList();
+        
+        view.popularCombosDeConta(contas);
+        
+        if(!contas.isEmpty()) {
+            exibirDadosUsuario(contas.get(0)); // Carrega os dados da primeira conta no painel Resumo
+        }
+    }
+
+    @Override
+    public void onContaSelecionada(String numConta) {
+        // Reutilizando seu método que já busca a conta e chama view.exibirDadosUsuario()
+        exibirDadosUsuario(numConta); 
+    }
 }

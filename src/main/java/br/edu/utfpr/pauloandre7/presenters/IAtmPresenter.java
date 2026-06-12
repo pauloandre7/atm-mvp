@@ -6,4 +6,6 @@ public interface IAtmPresenter {
     public void onDepositarClicked(String numConta, float valor, String senha);
     public void onTransferirClicked(String numContaOrigem, String numContaDestino, float valor, String senha);
     public void onExtratoClicked(String numConta);
+    public void inicializarView();
+    public void onContaSelecionada(String numConta);
 }
